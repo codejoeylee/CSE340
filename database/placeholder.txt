@@ -1,1 +1,26 @@
 This is only meant to preserved the folder it resides in. It can be deleted when actual files are created and stored.
+
+Task Two - Destroy and Rebuild the Database
+You should already be aware that Render.com removes free-tier databases after 30 days. 
+
+Therefore, it is critical that you know how to restore your database when that happens. 
+
+Task two requires you to go through the entire process manually, so you know how to do it again when the time comes.
+
+You will probably need to do this at least twice.
+
+Once to make sure you know the process and the second time to record a video of you doing so.
+
+The video should be less than four minutes in length - so you need to know exactly what you're doing.
+
+Destroy the database service in the Render.com dashboard by clicking on the database service, scrolling to the bottom and clicking "Delete Database" and following the provided directions.
+
+Create a new database following the directions from this unit as needed. The database name cannot be the same as the old one, but can be similar.
+
+Delete the existing connection to the remote database in the local tool: pgAdmin or SQLTools.
+
+Create a new connection between the database and one of the local tools: pgAdmin or SQLTools.
+
+Run the SQL code in your database rebuild file (you should already have all these queries stored in the database folder of your project), as a set of queries, run at the same time, to build the Type object, the three tables, and populate the classification and inventory tables. And, the copies of queries 4 and 6 from Task 1, should be run as the last items in the database rebuild file.
+
+Show that the structures and data exist.
