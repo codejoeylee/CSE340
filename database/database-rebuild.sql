@@ -42,11 +42,11 @@ CREATE TABLE inventory (
 
 -- Insert sample classifications
 INSERT INTO classification (classification_name) VALUES
-('Sport'),
-('SUV'),
-('Truck'),
-('Electric'),
-('Classic');
+  ('Custom'),
+  ('Sport'),
+  ('SUV'),
+  ('Truck'),
+  ('Sedan');
 
 -- Insert the correct inventory data
 INSERT INTO public.inventory (

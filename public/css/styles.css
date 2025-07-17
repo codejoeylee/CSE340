@@ -15,6 +15,7 @@
 
 html {
   background: repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) 50% / 100px 100px;
+  padding: 2px;
 }
 
 body {
@@ -22,18 +23,36 @@ body {
   max-width: 1200px;
   margin: 20px auto;
   background-color: #fff;
-  border: 3px solid var(--secondary-color);
+  /*border: 3px solid var(--secondary-color);*/
   border-radius: 5px;
   align-items: center;
 }
 
+
+
 header,
-main,
 footer {
   margin: 0;
   padding: 1rem;
 }
 
+main {
+  flex-grow: 1;
+  margin: 0;
+  padding: 1rem;
+}
+
+#wrapper {
+  /* Flexbox properties to control layout */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: #fff;
+  border: 3px solid var(--secondary-color);
+  border-radius: 5px;
+}
 
 
 h3 {
@@ -191,6 +210,97 @@ footer p {
   color: var(--accent-color)
 }
 
+
+
+
+.vehicle-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: 1rem 0;
+}
+
+.vehicle-detail img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.vehicle-info {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.vehicle-info h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.vehicle-info p {
+  margin: 0.5rem 0;
+}
+
+@media screen and (min-width: 768px) {
+  .vehicle-detail {
+    flex-direction: row;
+  }
+
+  .vehicle-detail img {
+    width: 50%;
+  }
+
+  .vehicle-info {
+    width: 50%;
+  }
+}
+
+
+#inv-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  list-style: none;
+}
+
+#inv-display li {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  background-color: #fff;
+  transition: box-shadow 0.3s ease;
+}
+
+#inv-display li:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.namePrice {
+  margin-top: 1rem;
+}
+
+.namePrice h2 {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.namePrice span {
+  font-weight: bold;
+  color: #007f5f;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 @media screen and (min-width: 800px) {
   .content {
     display: grid;
@@ -209,6 +319,11 @@ footer p {
     border-radius: 0;
   }
 
+  #wrapper{
+    border: 0;
+    margin: 0;
+  }
+
   figure {
     width: 100px;
     height: 120px;
@@ -222,24 +337,24 @@ footer p {
     border: 1px solid var(--primary-color);
   }
 
-    .hero-text {
-      position: absolute;
-      top: 40%;
-      left: 30%;
-      width: 200px;
-    }
+  .hero-text {
+    position: absolute;
+    top: 40%;
+    left: 30%;
+    width: 200px;
+  }
 
-    .content {
-      display: flex;
-      flex-direction: column;
-    }
+  .content {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .content-Review {
-      order: -1;
-    }
+  .content-Review {
+    order: -1;
+  }
 
-    .content-upgrades-item {
-      order: 0;
-    }
+  .content-upgrades-item {
+    order: 0;
+  }
 
 }

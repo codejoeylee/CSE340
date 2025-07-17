@@ -10,6 +10,9 @@ const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
 const app = express()
 const static = require("./routes/static")
+const baseController = require("./controllers/baseController")
+const utilities = require("./utilities/");
+const inventoryRoute = require("./routes/inventoryRoute")
 
 /* ***********************
  * View Engine and Templates
@@ -31,6 +34,12 @@ app.get("/", function (req, res) {
   res.render("index", {title: "Home"})
 })
 
+
+
+// Inventory routes
+app.use("/inv", inventoryRoute)
+
+
 /* ***********************
  * Local Server Information
  * Values from .env (environment) file
@@ -44,3 +53,21 @@ const host = process.env.HOST
 app.listen(port, () => {
   console.log(`app listening on ${host}:${port}`)
 })
+
+
+// Handle 404s
+app.use((req, res) => {
+  res.status(404).render("404", {
+    title: "Page Not Found",
+    message: "Sorry, we apper to have lost that page."
+  });
+});
+
+
+app.use((err, req, res, next) => {
+  console.error("❌ Server Error:", err.message);
+  res.status(500).render("error", {
+    title: "Server Error",
+    message: err.message
+  });
+});
