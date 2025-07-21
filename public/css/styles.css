@@ -241,6 +241,145 @@ footer p {
   margin: 0.5rem 0;
 }
 
+.notice {
+  color: rgb(165, 0, 0);
+  font-style: italic;
+  font-weight: bold;
+}
+
+
+
+/* Flash message styles */
+/* Flash message container */
+/* Center and clean up flash message */
+/* Login container to center everything */
+.login-container {
+  max-width: 420px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Flash message inside login container */
+.login-container ul.messages {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.login-container ul.messages li.notice {
+  background-color: #fff8e1;
+  border-left: 5px solid #ffa726;
+  color: #5d4037;
+  padding: 1rem;
+  border-radius: 5px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.registration-stat {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color:green;
+}
+
+/* Login form container */
+form {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form labels and inputs */
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Submit button */
+form button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0288d1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #0277bd;
+}
+
+/* Registration link styling */
+form+p {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+form+p a {
+  color: #0288d1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+form+p a:hover {
+  text-decoration: underline;
+}
+
+
+/*  Register box */
+.flash-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+/* Clean message styling */
+ul.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.messages li.notice {
+  background-color: #fff8e1;
+  border-left: 5px solid #ffa726;
+  color: #5d4037;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  text-align: center;
+}
+
+
+
+
+
+
+
 @media screen and (min-width: 768px) {
   .vehicle-detail {
     flex-direction: row;
@@ -319,7 +458,7 @@ footer p {
     border-radius: 0;
   }
 
-  #wrapper{
+  #wrapper {
     border: 0;
     margin: 0;
   }
@@ -358,3 +497,19 @@ footer p {
   }
 
 }
+
+ul.messages {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.messages li.notice {
+  background-color: #f0f8ff;
+}
+
+ul.messages li.error {
+  background-color: #ffe0e0;
+}
+
+/* ... and more styles as needed */
