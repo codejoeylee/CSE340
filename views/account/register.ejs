@@ -1,5 +1,16 @@
 <h1><%= title %></h1>
 
+
+<% if (errors && errors.array().length > 0) { %>
+  <ul class="form-errors">
+    <% errors.array().forEach(error => { %>
+      <li><%= error.msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+
+
 <!-- Centered Flash Message outside container -->
 <div class="flash-container">
   <%- messages() %>
@@ -17,14 +28,38 @@
     <input type="text" name="account_lastname" id="account_lastname" required>
 
     <label for="account_email">Email</label>
-    <input type="email" name="account_email" id="account_email" required>
+    <input type="email" name="account_email" id="account_email" required placeholder="Enter a valid email address">
 
     <label for="account_password">Password</label>
-    <input type="password" name="account_password" id="account_password"
-           required placeholder="12+ chars, 1 uppercase, 1 number, 1 special">
+    <div class="password-rules">
+    Passwords must be at least <strong>12 characters</strong> and contain:
+      <ul>
+        <li>1 uppercase letter</li>
+        <li>1 number</li>
+        <li>1 special character</li>
+      </ul>
+    </div>
+    <input 
+      type="password"
+      name="account_password"
+      id="accountPassword"
+      required
+      pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,}$"
+      placeholder="Create a strong password">
+      <label>
+        <input type="checkbox" onclick="togglePassword()"> Show Password
+      </label>
 
     <button type="submit">Register</button>
   </form>
 
   <p>Already have an account? <a href="/account/login">Log in</a></p>
 </div>
+
+
+<script>
+  function togglePassword() {
+    const pwd = document.getElementById("accountPassword");
+    pwd.type = pwd.type === "password" ? "text" : "password";
+  }
+</script>

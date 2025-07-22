@@ -288,6 +288,28 @@ footer p {
   color:green;
 }
 
+.password-rules {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.password-rules ul {
+  padding-left: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+input:required:valid {
+  border: 2px solid #28a745;
+  /* Green border on success */
+}
+
+input:required:invalid {
+  border: 2px solid #dc3545;
+  /* Red border if pattern doesn't match */
+}
+
+
 /* Login form container */
 form {
   max-width: 400px;
@@ -313,6 +335,18 @@ form input {
   border-radius: 4px;
   font-size: 1rem;
 }
+
+
+
+.form-errors {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
 
 /* Submit button */
 form button {
@@ -346,6 +380,8 @@ form+p a {
 form+p a:hover {
   text-decoration: underline;
 }
+
+
 
 
 /*  Register box */
