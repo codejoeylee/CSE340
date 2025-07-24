@@ -99,4 +99,52 @@ Util.handleErrors = function (fn) {
 
 
 
-module.exports = Util;
+async function buildClassificationList(classification_id = null) {
+  const data = await invModel.getClassifications();
+  let classificationList =
+    '<select name="classification_id" id="classificationList" required>';
+  classificationList += "<option value=''>Choose a Classification</option>";
+
+  data.rows.forEach((row) => {
+    classificationList += `<option value="${row.classification_id}"`;
+    if (
+      classification_id !== null &&
+      row.classification_id == classification_id
+    ) {
+      classificationList += " selected";
+    }
+    classificationList += `>${row.classification_name}</option>`;
+  });
+
+  classificationList += "</select>";
+  return classificationList;
+}
+
+
+// Catch validation errors and pass them to the view
+function handleErrors(controllerFunction) {
+  return async function(req, res, next) {
+    const { validationResult } = require("express-validator");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const nav = await module.exports.getNav();
+      return res.render(res.locals.view, {
+        title: res.locals.title,
+        nav,
+        errors: errors.array(),
+        ...req.body
+      });
+    }
+    controllerFunction(req, res, next);
+  };
+}
+
+
+
+module.exports = {
+  getNav: Util.getNav,
+  buildClassificationGrid: Util.buildClassificationGrid,
+  buildVehicleDetail: Util.buildVehicleDetail,
+  buildClassificationList,
+  handleErrors
+};

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title><%= title %> | CSE Motors</title>
+</head>
+<body>
+  <h1><%= title %></h1>
+
+  <!-- Flash Message -->
+  <%- messages() %>
+
+  <div class="card">
+    <h2>Inventory Management</h2>
+    <p>Use the links below to manage inventory classifications and vehicles.</p>
+    <ul>
+        <li><a href="/inv/add-classification">➕ Add New Classification</a></li>
+        <li><a href="/inv/add-inventory">🚗 Add New Vehicle</a></li>
+    </ul>
+  </div>
+</body>
+</html>
