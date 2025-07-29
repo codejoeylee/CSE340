@@ -1,6 +1,8 @@
 // utilities/index.js
 const invModel = require("../models/inventory-model");
 const Util = {};
+const jwt = require("jsonwebtoken")
+require("dotenv").config();
 
 /* ************************
  * Constructs the nav HTML unordered list
@@ -98,6 +100,30 @@ Util.handleErrors = function (fn) {
 };
 
 
+/* ****************************************
+* Middleware to check token validity
+**************************************** */
+Util.checkJWTToken = (req, res, next) => {
+ if (req.cookies.jwt) {
+  jwt.verify(
+   req.cookies.jwt,
+   process.env.ACCESS_TOKEN_SECRET,
+   function (err, accountData) {
+    if (err) {
+     req.flash("Please log in")
+     res.clearCookie("jwt")
+     return res.redirect("/account/login")
+    }
+    res.locals.accountData = accountData
+    res.locals.loggedin = 1
+    next()
+   })
+ } else {
+  next()
+ }
+}
+
+
 
 async function buildClassificationList(classification_id = null) {
   const data = await invModel.getClassifications();
@@ -121,30 +147,53 @@ async function buildClassificationList(classification_id = null) {
 }
 
 
-// Catch validation errors and pass them to the view
-function handleErrors(controllerFunction) {
-  return async function(req, res, next) {
-    const { validationResult } = require("express-validator");
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const nav = await module.exports.getNav();
-      return res.render(res.locals.view, {
-        title: res.locals.title,
-        nav,
-        errors: errors.array(),
-        ...req.body
-      });
-    }
-    controllerFunction(req, res, next);
-  };
+
+
+/* **************************************
+ * Check if user is logged in
+ ************************************** */
+Util.checkLogin = (req, res, next) => {
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    res.redirect("/account/login")
+  }
 }
 
+
+/* ****************************************
+* Middleware to check if user has a specific account type (e.g., "Admin", "Employee")
+* This is a placeholder for now. You'll likely expand this later.
+* ****************************************/
+Util.checkAccountType = (req, res, next) => {
+  console.log('--- checkAccountType Debug ---');
+  console.log('res.locals.loggedin:', res.locals.loggedin);
+  console.log('res.locals.accountData:', res.locals.accountData);
+
+  // Make sure res.locals.accountData exists before trying to access its properties
+  const accountType = res.locals.accountData ? res.locals.accountData.account_type : null;
+  console.log('Account Type:', accountType);
+
+  if (res.locals.loggedin && (accountType === 'Admin' || accountType === 'Employee')) {
+    console.log('User has sufficient permissions. Proceeding to next middleware.');
+    next();
+  } else {
+    console.log('User NOT logged in or insufficient permissions. Redirecting to /account/login');
+    req.flash("notice", "You do not have the necessary permissions to access this page.");
+    // This redirect is what causes the HTML response for the fetch call
+    res.redirect("/account/login"); // Or whatever your default redirect for no access is
+  }
+};
 
 
 module.exports = {
   getNav: Util.getNav,
   buildClassificationGrid: Util.buildClassificationGrid,
   buildVehicleDetail: Util.buildVehicleDetail,
+  checkLogin: Util.checkLogin,
   buildClassificationList,
-  handleErrors
+  handleErrors: Util.handleErrors,
+  checkJWTToken: Util.checkJWTToken,
+  checkAccountType: Util.checkAccountType,
 };

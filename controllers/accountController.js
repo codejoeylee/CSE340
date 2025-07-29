@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const utilities = require("../utilities");
 const accountModel = require("../models/account-model");
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 /* ****************************************
  *  Deliver login view
@@ -64,55 +66,85 @@ async function registerAccount(req, res) {
 }
 
 
-async function loginHandler(req, res) {
-  const nav = await utilities.getNav();
-  const { account_email, account_password } = req.body;
-
-  try {
-    //  Check if the email exists
-    const accountData = await accountModel.getAccountByEmail(account_email);
+/* ****************************************
+*  Process Login
+* *************************************** */
+async function accountLogin(req, res) {
+    let nav = await utilities.getNav()
+    const { account_email, account_password } = req.body
+    const accountData = await accountModel.getAccountByEmail(account_email)
 
     if (!accountData) {
-      req.flash("notice", "Email not found. Please register.");
-      return res.status(400).render("account/login", {
-        title: "Login",
-        nav,
-        account_email
-      });
+        req.flash("notice", "Please check your credentials and try again.")
+        return res.status(400).render("account/login", {
+            title: "Login",
+            nav,
+            errors: null,
+            account_email,
+        })
     }
 
-    //  Compare password using bcrypt
-    const match = await bcrypt.compare(account_password, accountData.account_password);
+    try {
+        if (await bcrypt.compare(account_password, accountData.account_password)) {
+            delete accountData.account_password
+            const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 })
 
-    if (!match) {
-      req.flash("notice", "Incorrect password.");
-      return res.status(400).render("account/login", {
-        title: "Login",
-        nav,
-        account_email
-      });
+            res.cookie("jwt", accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: "lax",
+                maxAge: 3600 * 1000
+            })
+
+            return res.redirect("/account/")
+
+        } else {
+            req.flash("notice", "Please check your credentials and try again.")
+            return res.status(400).render("account/login", {
+                title: "Login",
+                nav,
+                errors: null,
+                account_email,
+            })
+        }
+    } catch (error) {
+        console.error("Login error:", error)
+        req.flash("notice", "An expected error occurred.")
+        return res.status(500).render("account/login",{
+            title: "Login",
+            nav,
+            errors: null,
+            account_email,
+        })
+      } 
     }
+  
 
-    //  Store session data
-    req.session.accountId = accountData.account_id;
-    req.session.accountName = accountData.account_firstname;
-    req.session.accountEmail = accountData.account_email;
+/* ****************************************
+*  Deliver account management view
+* *************************************** */
+async function buildAccount(req, res, next) {
+  let nav = await utilities.getNav()
+  let account_firstname = "User"
 
-    req.flash("notice", `Welcome back, ${accountData.account_firstname}!`);
-    res.redirect("/account/dashboard"); // or wherever your dashboard lives
-
-  } catch (error) {
-    console.error("Login error:", error.message);
-    req.flash("notice", "Something went wrong. Please try again.");
-    res.status(500).render("account/login", {
-      title: "Login",
-      nav,
-      account_email
-    });
+  try{
+    const token = req.cookies.jwt
+    if (token) {
+        const decoded = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+        account_firstname = decoded.account_firstname
+    }
+  } catch (err) {
+    console.error("JWT decode error:", err)
   }
+  
+  res.render("account/account-management", {
+  title: "Account Management",
+  nav,
+  errors: null,
+  account_firstname: res.locals.accountData?.account_firstname || "User"
+})
 }
 
 
-
-module.exports = { buildLogin, buildRegister, registerAccount , loginHandler};
+module.exports = { buildLogin, buildRegister, registerAccount , accountLogin , buildAccount};
 

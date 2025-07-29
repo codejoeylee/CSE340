@@ -1,0 +1,28 @@
+<!-- Heading title -->
+<% if (title) { %>
+<h1><%= title %></h1>
+<% } %>
+
+<!-- Message display -->
+<%- messages() %>
+
+
+<% if (errors) { %>
+    <ul class="notice">
+    <% errors.array().forEach(error => { %>
+        <li><%= error.msg %></li>
+<% }) %>
+    </ul>
+<% } %>
+
+<!-- Welcome message -->
+<h2>Welcome <%= locals.accountData.account_firstname %></h2>
+
+<p>You're logged in!</p>
+
+<p><a href="/account/update/<%= locals.accountData.account_id %>" title="Click to edit account information">Edit Account Information</a></p>
+
+<% if (locals.accountData.account_type === "Employee" || locals.accountData.account_type === "Admin") { %>
+    <h3>Inventory Management</h3>
+    <p><a href="/inv/" title="Click to manage inventory">Manage Inventory</a></p>
+<% } %>

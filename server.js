@@ -19,16 +19,28 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const pgStore = require("connect-pg-simple")(session);
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser")
+const utilities = require("./utilities/")
 
 
 const app = express();
+
+app.use(async (req, res, next) => {
+  try {
+    const nav = await utilities.getNav()
+    res.locals.nav = nav // This makes nav available to all views
+    next()
+  } catch (err) {
+    console.error("❌ nav middleware error:", err)
+    next(err)
+  }
+})
 
 // Routes & Utilities
 const staticRoutes = require("./routes/static");
 const inventoryRoutes = require("./routes/inventoryRoute");
 const baseController = require("./controllers/baseController");
 const accountRoute = require("./routes/accountRoute");
-const utilities = require("./utilities");
 const pool = require("./database/");
 
 // ***********************
@@ -60,6 +72,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // for form data parsing
+app.use(cookieParser());
+app.use(utilities.checkJWTToken);
 
 
 // ***********************

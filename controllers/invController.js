@@ -1,157 +1,364 @@
 const invModel = require("../models/inventory-model")
-const utilities = require("../utilities/")
+const utilities = require("../utilities")
 
 const invCont = {}
 
 /* ***************************
- *  Build inventory by classification view
+ * Build inventory by classification view
  * ************************** */
 invCont.buildByClassificationId = async function (req, res, next) {
   const classification_id = req.params.classificationId
   const data = await invModel.getInventoryByClassificationId(classification_id)
   const grid = await utilities.buildClassificationGrid(data)
-  let nav = await utilities.getNav()
+  const nav = await utilities.getNav()
 
   if (!data || data.length === 0) {
-    // fallback title if inventory is empty
     return res.status(404).render("inventory/classification", {
       title: "No Vehicles Found",
       nav,
       grid
-    });
+    })
   }
 
-
   const className = data[0].classification_name
-  res.render("./inventory/classification", {
-    title: className + " vehicles",
+  res.render("inventory/classification", {
+    title: `${className} vehicles`,
     nav,
-    grid,
+    grid
   })
 }
 
-
 /* ***************************
- *  Build single vehicle detail view
+ * Build single vehicle detail view
  * ************************** */
 invCont.buildVehicleDetail = async function (req, res, next) {
-  const invId = req.params.invId;
-  const vehicle = await invModel.getVehicleById(invId);
-  const html = utilities.buildVehicleDetail(vehicle);
-  let nav = await utilities.getNav();
+  const invId = req.params.invId
+  const vehicle = await invModel.getVehicleById(invId)
+  const html = utilities.buildVehicleDetail(vehicle)
+  const nav = await utilities.getNav()
 
-  const name = vehicle.inv_make + " " + vehicle.inv_model;
+  const name = `${vehicle.inv_make} ${vehicle.inv_model}`
 
-  res.render("./inventory/detail", {
+  res.render("inventory/detail", {
     title: name,
     nav,
     vehicleHtml: html
-  });
-};
-
+  })
+}
 
 /* ***************************
- *  Build management
+ * Build inventory management view
  * ************************** */
 invCont.buildManagement = async function (req, res) {
-  const nav = await utilities.getNav();
-  req.flash("notice", "Welcome to Inventory Management");
-  res.render("./inventory/management", {
+  const nav = await utilities.getNav()
+  const classificationSelect = await utilities.buildClassificationList()
+  const notice = req.flash("notice")[0] || null
+  res.render("inventory/management", {
     title: "Inventory Management",
     nav,
-    errors: null
-  });
-};
-
+    notice, // Pass the retrieved notice to the view
+    errors: null,
+    classificationSelect,
+  })
+}
 
 /* ***************************
- *  Build addclassification
+ * Build add classification view
  * ************************** */
 invCont.buildAddClassification = async function (req, res) {
-  const nav = await utilities.getNav();
-  res.render("./inventory/add-classification", {
+  const nav = await utilities.getNav()
+  res.render("inventory/add-classification", {
     title: "Add Classification",
     nav,
     errors: null
-  });
-};
-
-
+  })
+}
 
 /* ***************************
- *  Insert Classification()
+ * Insert Classification
  * ************************** */
 invCont.insertClassification = async function (req, res) {
-  const nav = await utilities.getNav();
-  const { classification_name } = req.body;
+  const nav = await utilities.getNav()
+  const { classification_name } = req.body
 
-  const result = await invModel.addClassification(classification_name);
+  const result = await invModel.addClassification(classification_name)
 
   if (result) {
-    const updatedNav = await utilities.getNav(); // Refresh nav bar
-    req.flash("notice", `Classification '${classification_name}' added successfully.`);
-    res.redirect("/inv/");
+    req.flash("notice", `Classification '${classification_name}' added successfully.`)
+    res.redirect("/inv/")
   } else {
-    req.flash("notice", "Failed to add classification.");
-    res.status(500).render("./inventory/add-classification", {
+    // This notice is for re-rendering the same page on failure
+    req.flash("notice", "Failed to add classification.")
+    const notice = req.flash("notice")[0] || null;
+    res.status(500).render("inventory/add-classification", {
       title: "Add Classification",
       nav,
+      notice,
       errors: null
-    });
+    })
   }
-};
-
-
-/* ***************************
- *  Add inventory controller
- * ************************** */
-invCont.buildAddInventory = async function (req, res) {
-  const nav = await utilities.getNav();
-  const classificationList = await utilities.buildClassificationList();
-  res.render("./inventory/add-inventory", {
-    title: "Add Vehicle",
-    nav,
-    classificationList,
-    errors: null
-  });
-};
-
-
-
-
+}
 
 /* ***************************
- *  Insert Inventory()
+ * Build add inventory view
  * ************************** */
-invCont.insertInventory = async function (req, res) {
-  const nav = await utilities.getNav();
-  const classificationList = await utilities.buildClassificationList(req.body.classification_id);
+invCont.buildAddInventory = async function (req, res, next) {
+  try {
+    const nav = await utilities.getNav()
+    const classifications = await invModel.getClassifications()
+    const classificationList = await utilities.buildClassificationList(classifications)
+    const notice = req.flash("notice")[0] || null
 
-  const result = await invModel.insertInventoryItem(req.body);
-
-  if (result) {
-    req.flash("notice", "Inventory item added successfully.");
-    res.redirect("/inv/");
-  } else {
-    req.flash("notice", "Failed to add inventory item.");
-    res.status(500).render("./inventory/add-inventory", {
+    res.render("inventory/add-inventory", {
       title: "Add Vehicle",
       nav,
       classificationList,
+      notice: null,
       errors: null,
-      ...req.body // for sticky fields
+      ...req.body
+    })
+  } catch (error) {
+    console.error("Error in buildAddInventory:", error)
+    next(error)
+  }
+}
+
+/* ***************************
+ * Insert Inventory
+ * ************************** */
+invCont.insertInventory = async function (req, res) {
+  // ⭐️ CORRECTED: Fetch nav and classifications once at the top
+  const nav = await utilities.getNav()
+  const classifications = await invModel.getClassifications()
+  const classificationList = await utilities.buildClassificationList(classifications)
+  let notice
+
+  try {
+    const result = await invModel.insertInventoryItem(req.body)
+
+    if (result) {
+      req.flash("notice", "Inventory item added successfully.")
+      return res.redirect("/inv/")
+    } else {
+      req.flash("notice", "Failed to add inventory item.")
+      notice = req.flash("notice")[0] || null
+      return res.status(500).render("inventory/add-inventory", {
+        title: "Add Vehicle",
+        nav,
+        classificationList,
+        notice,
+        errors: null,
+        ...req.body
+      })
+    }
+  } catch (error) {
+    console.error("🚨 Inventory insert failed:", error.message)
+    req.flash("notice", "An unexpected error occurred while adding inventory.")
+    notice = req.flash("notice")[0] || null
+    return res.status(500).render("inventory/add-inventory", {
+      title: "Add Vehicle",
+      nav,
+      classificationList,
+      notice,
+      errors: [{ msg: "Something went wrong. Please try again." }],
+      ...req.body
+    })
+  }
+}
+
+/* ***************************
+ * Trigger intentional error
+ * ************************** */
+invCont.throwError = (req, res, next) => {
+  throw new Error("Intentional server error triggered for testing.")
+}
+
+
+
+/* ***************************
+ *  Return Inventory by Classification As JSON
+ * ************************** */
+invCont.getInventoryJSON = async (req, res, next) => {
+  const classification_id = parseInt(req.params.classification_id);
+  const invData = await invModel.getInventoryByClassificationId(classification_id);
+
+  // Add a console.log here to see what invData actually contains
+  console.log("Data from invModel.getInventoryByClassificationId:", invData);
+
+  // Safely check if invData is an array and if it contains any elements
+  if (Array.isArray(invData) && invData.length > 0) { // <--- CORRECTED CHECK
+    return res.json(invData);
+  } else {
+    // If no data is found, send an empty array back to the client
+    // This is generally better than a 500 error for "no results"
+    console.log(`No inventory found for classification_id: ${classification_id}`);
+    return res.json([]); // <--- Send an empty array if no data
+  }
+};
+
+
+/* ***************************
+ * Build edit inventory view (ADD THIS NEW FUNCTION)
+ * ************************** */
+invCont.editInventoryView = async function (req, res, next) {
+  const inv_id = parseInt(req.params.inv_id); // Ensure the ID from the URL is an integer
+  let nav = await utilities.getNav();
+
+  // Fetch the item data from the database using the inventory ID
+  const itemData = await invModel.getInventoryById(inv_id);
+
+  // --- VERY IMPORTANT DEBUGGING STEP ---
+  // Add this console.log to confirm itemData contains inventory_id
+  console.log("itemData fetched for edit:", itemData);
+  // You should see itemData.inventory_id: <a number> in your server console when you load the edit page.
+  // --- END DEBUGGING STEP ---
+
+  // Build the classification list, pre-selecting the item's classification
+  const classificationSelect = await utilities.buildClassificationList(itemData.classification_id);
+
+  const itemName = `${itemData.inv_make} ${itemData.inv_model}`;
+
+  res.render("inventory/edit-inventory", {
+    title: "Edit " + itemName,
+    nav,
+    classificationSelect: classificationSelect,
+    errors: null, // No errors on initial load
+
+    // <--- CRITICAL: Ensure inventory_id from itemData is passed as 'inv_id' to the view locals --->
+    inv_id: itemData.inventory_id, // This populates locals.inv_id in the EJS
+    inv_make: itemData.inv_make,
+    inv_model: itemData.inv_model,
+    inv_year: itemData.inv_year,
+    inv_description: itemData.inv_description,
+    inv_image: itemData.inv_image,
+    inv_thumbnail: itemData.inv_thumbnail,
+    inv_price: itemData.inv_price,
+    inv_miles: itemData.inv_miles,
+    inv_color: itemData.inv_color,
+    classification_id: itemData.classification_id
+  });
+};
+
+
+/* ***************************
+ * Update Inventory Data (ADD THIS NEW FUNCTION)
+ * ************************** */
+invCont.updateInventory = async function (req, res, next) {
+  console.log("Received req.body for update:", req.body);
+  let nav = await utilities.getNav();
+  const {
+    inv_id, // Ensure inv_id is destructured from req.body
+    inv_make,
+    inv_model,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_year,
+    inv_miles,
+    inv_color,
+    classification_id,
+  } = req.body; // All data comes from req.body
+
+  // Call the model function to perform the update
+  const updateResult = await invModel.updateInventory(
+    inv_id,
+    inv_make,
+    inv_model,
+    inv_description,
+    inv_image,
+    inv_thumbnail,
+    inv_price,
+    inv_year,
+    inv_miles,
+    inv_color,
+    classification_id
+  );
+
+  // Handle the result of the update
+  if (updateResult) {
+    const itemName = updateResult.inv_make + " " + updateResult.inv_model;
+    req.flash("notice", `The ${itemName} was successfully updated.`);
+    res.redirect("/inv/"); // Redirect to management view on success
+  } else {
+    // If update failed, re-render the edit form with an error message
+    const classificationSelect = await utilities.buildClassificationList(classification_id);
+    const itemName = `${inv_make} ${inv_model}`;
+    req.flash("notice", "Sorry, the update failed.");
+    res.status(501).render("inventory/edit-inventory", {
+      title: "Edit " + itemName,
+      nav,
+      classificationSelect: classificationSelect,
+      errors: null, // Errors will be handled by invVal.checkUpdateData if it gets here after validation
+      // Pass back all the submitted data to make the form sticky
+      inv_id,
+      inv_make,
+      inv_model,
+      inv_year,
+      inv_description,
+      inv_image,
+      inv_thumbnail,
+      inv_price,
+      inv_miles,
+      inv_color,
+      classification_id
     });
   }
 };
 
 
+/* ***************************
+ * Build delete confirmation view
+ * ************************** */
+invCont.deleteView = async function (req, res, next) {
+  const inv_id = parseInt(req.params.inv_id); // Get inv_id from URL parameter
+  let nav = await utilities.getNav();
+  const itemData = await invModel.getInventoryById(inv_id); // Fetch vehicle data
 
+  if (!itemData) {
+    req.flash("notice", "Sorry, that vehicle could not be found.");
+    return res.redirect("/inv/"); // Redirect if vehicle not found
+  }
 
-// This throws a real error to test the middleware
-invCont.throwError = (req, res, next) => {
-  throw new Error("Intentional server error triggered for testing.");
+  const itemName = `${itemData.inv_make} ${itemData.inv_model}`;
+  res.render("inventory/delete-confirm", { // Render the delete-confirm view
+    title: "Delete " + itemName, // Set title for the view
+    nav,
+    errors: null, // No errors on initial load
+    // Pass only the data needed for the delete-confirm view
+    inv_id: itemData.inventory_id,
+    inv_make: itemData.inv_make,
+    inv_model: itemData.inv_model,
+    inv_year: itemData.inv_year,
+    inv_price: itemData.inv_price,
+    inv_miles: itemData.inv_miles, // Miles is also displayed
+    inv_color: itemData.inv_color, // Color is also displayed (if you decide to keep it in view)
+    // The instructions specified only make, model, year, price.
+    // Ensure you pass only what delete-confirm.ejs expects, or pass all for safety.
+    // For now, let's align strictly with prompt for make, model, year, price.
+    // If you kept more fields in your EJS, pass them here.
+  });
 };
 
+
+/* ***************************
+ * Process Delete Inventory
+ * ************************** */
+invCont.deleteItem = async function (req, res, next) {
+  const inv_id = parseInt(req.body.inv_id); // Get inv_id from the hidden input in the form
+  const deleteResult = await invModel.deleteInventoryItem(inv_id); // Call the model function to delete
+
+  if (deleteResult) { // If rowCount > 0, deletion was successful
+    req.flash("notice", `The deletion was successful.`);
+    res.redirect("/inv/"); // Redirect to inventory management on success
+  } else {
+    // If deletion failed, fetch item data again for sticky form and error message
+    const itemData = await invModel.getInventoryById(inv_id);
+    const itemName = `${itemData.inv_make} ${itemData.inv_model}`;
+    req.flash("notice", `Sorry, the delete failed for ${itemName}.`);
+    res.redirect(`/inv/delete/${inv_id}`); // Redirect back to delete confirmation view on failure
+  }
+};
 
 
 module.exports = invCont

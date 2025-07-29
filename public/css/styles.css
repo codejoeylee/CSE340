@@ -285,7 +285,7 @@ footer p {
   font-size: 2rem;
   margin-top: 2rem;
   margin-bottom: 1rem;
-  color:green;
+  color: green;
 }
 
 .password-rules {
@@ -353,7 +353,7 @@ form button {
   width: 100%;
   padding: 0.75rem;
   background-color: #0288d1;
-  color: white;
+  color: black;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -467,42 +467,41 @@ ul.messages li.notice {
 
 
 
-    .card {
-      max-width: 480px;
-      margin: 2rem auto;
-      padding: 1.5rem;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background-color: #fcfcfc;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-      font-family: sans-serif;
-    }
-  
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.4rem;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 0.5rem;
-    }
-  
-    .card ul {
-      list-style-type: none;
-      padding: 0;
-    }
-  
-    .card li {
-      margin: 0.5rem 0;
-    }
-  
-    .card a {
-      text-decoration: none;
-      color: #0066cc;
-    }
-  
-    .card a:hover {
-      text-decoration: underline;
+.card {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fcfcfc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  font-family: sans-serif;
+}
 
+.card h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
 
+.card ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.card li {
+  margin: 0.5rem 0;
+}
+
+.card a {
+  text-decoration: none;
+  color: #0066cc;
+}
+
+.card a:hover {
+  text-decoration: underline;
+}
 
 
 
@@ -582,3 +581,6 @@ ul.messages li.error {
 }
 
 /* ... and more styles as needed */
+.error-link a {
+  color: yellow;
+}
