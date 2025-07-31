@@ -1,6 +1,6 @@
 // models/inventory-model.js
 
-const pool = require("../database"); // adjust path to your pool
+const pool = require("../database"); 
 
 /* ***************************
  * Get all classifications
@@ -35,10 +35,10 @@ async function getInventoryByClassificationId(classification_id) {
 async function getVehicleById(inv_id) {
   try {
     const data = await pool.query(
-      `SELECT * FROM inventory WHERE inventory_id = $1`, // ✔️ corrected column name
+      `SELECT * FROM inventory WHERE inventory_id = $1`, 
       [inv_id]
     );
-    return data.rows[0]; // returns just one vehicle
+    return data.rows[0]; 
   } catch (error) {
     console.error("getVehicleById error: " + error);
   }
@@ -140,12 +140,12 @@ async function updateInventory(
  * ************************** */
 async function deleteInventoryItem(inv_id) {
   try {
-    const sql = 'DELETE FROM public.inventory WHERE inventory_id = $1'; // Use inventory_id column name
+    const sql = 'DELETE FROM public.inventory WHERE inventory_id = $1'; 
     const data = await pool.query(sql, [inv_id]);
-    return data.rowCount; // This will return the QueryResult object, data.rowCount will be 1 on success
+    return data.rowCount;
   } catch (error) {
-    console.error("Delete Inventory Error: " + error); // More specific error message
-    throw new Error("Delete Inventory Error"); // Re-throw a generic error for consistency
+    console.error("Delete Inventory Error: " + error); 
+    throw new Error("Delete Inventory Error"); 
   }
 }
 

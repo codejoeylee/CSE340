@@ -3,6 +3,7 @@ const utilities = require("../utilities");
 const accountModel = require("../models/account-model");
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
+const { body, validationResult } = require("express-validator");
 
 /* ****************************************
  *  Deliver login view
@@ -146,5 +147,197 @@ async function buildAccount(req, res, next) {
 }
 
 
-module.exports = { buildLogin, buildRegister, registerAccount , accountLogin , buildAccount};
+
+
+/* ****************************************
+ * Deliver account update view
+ * *************************************** */
+async function buildAccountUpdate(req, res, next) {
+  const account_id = parseInt(req.params.account_id);
+  // Fetch account data from the database using the model
+  const accountData = await accountModel.getAccountById(account_id);
+
+  // If accountData is not found (shouldn't happen if checkLogin/checkAccountOwnership are good)
+  if (!accountData) {
+    req.flash("notice", "Account not found.");
+    return res.redirect("/account/");
+  }
+
+  // Set title and render the view
+  let nav = await utilities.getNav();
+  res.render("account/update", {
+    title: "Edit Account",
+    nav,
+    errors: null, // No errors initially
+    accountData, // Pass the account data to the view for sticky fields
+  });
+}
+
+/* ****************************************
+ * Process account update
+ * *************************************** */
+async function updateAccount(req, res, next) {
+  let nav = await utilities.getNav();
+  const { account_firstname, account_lastname, account_email, account_id } = req.body;
+
+  // Checking for validation errors from express-validator
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.render("account/update", {
+      title: "Edit Account",
+      nav,
+      errors,
+      accountData: {
+        account_id, 
+        account_firstname,
+        account_lastname,
+        account_email,
+      },
+    });
+  }
+
+  try {
+    // Get current account data to check if email is actually changing
+    const currentAccount = await accountModel.getAccountById(account_id);
+    if (!currentAccount) {
+      req.flash("notice", "Account not found.");
+      return res.redirect("/account/");
+    }
+
+    // Checking if the new email already exists and is different from the current one
+    if (account_email !== currentAccount.account_email) {
+      const emailExists = await accountModel.checkExistingEmail(account_email);
+      if (emailExists) {
+        req.flash("notice", "Email already exists. Please use a different email.");
+        return res.render("account/update", {
+          title: "Edit Account",
+          nav,
+          errors: null, 
+          accountData: {
+            account_id,
+            account_firstname,
+            account_lastname,
+            account_email, 
+          },
+        });
+      }
+    }
+
+    // Calling the model function to update account information
+    const updateResult = await accountModel.updateAccount(
+      account_firstname,
+      account_lastname,
+      account_email,
+      account_id
+    );
+
+    if (updateResult) {
+      req.flash("notice", "Account information updated successfully.");
+      const updatedAccountData = await accountModel.getAccountById(account_id);
+      res.locals.accountData = updatedAccountData; 
+      return res.redirect("/account/");
+    } else {
+      req.flash("notice", "Failed to update account information. Please try again.");
+      return res.render("account/update", {
+        title: "Edit Account",
+        nav,
+        errors: null,
+        accountData: {
+          account_id,
+          account_firstname,
+          account_lastname,
+          account_email,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error updating account:", error);
+    req.flash("notice", "An error occurred during account update.");
+    return res.render("account/update", {
+      title: "Edit Account",
+      nav,
+      errors: null,
+      accountData: {
+        account_id,
+        account_firstname,
+        account_lastname,
+        account_email,
+      },
+    });
+  }
+}
+
+/* ****************************************
+ * Process password change
+ * *************************************** */
+async function changePassword(req, res, next) {
+  let nav = await utilities.getNav();
+  const { account_password, account_id } = req.body;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.render("account/update", {
+      title: "Edit Account",
+      nav,
+      errors,
+      accountData: res.locals.accountData, 
+    });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(account_password, 10); 
+
+    const updateResult = await accountModel.updatePassword(
+      hashedPassword,
+      account_id
+    );
+
+    if (updateResult) {
+      req.flash("notice", "Password updated successfully.");
+      return res.redirect("/account/"); 
+    } else {
+      req.flash("notice", "Failed to change password. Please try again.");
+      return res.render("account/update", {
+        title: "Edit Account",
+        nav,
+        errors: null,
+        accountData: res.locals.accountData,
+      });
+    }
+  } catch (error) {
+    console.error("Error changing password:", error);
+    req.flash("notice", "An error occurred during password change.");
+    return res.render("account/update", {
+      title: "Edit Account",
+      nav,
+      errors: null,
+      accountData: res.locals.accountData,
+    });
+  }
+}
+
+/* ****************************************
+ * Process logout (Task 6)
+ * *************************************** */
+async function accountLogout(req, res, next) {
+  res.clearCookie("jwt"); 
+  req.flash("notice", "You have been logged out.");
+  return res.redirect("/"); 
+}
+
+
+
+
+
+
+module.exports = {
+  buildLogin,
+  buildRegister,
+  registerAccount,
+  accountLogin,
+  buildAccount,
+  buildAccountUpdate,
+  updateAccount,
+  accountLogout,
+};
 

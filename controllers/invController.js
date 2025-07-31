@@ -222,10 +222,9 @@ invCont.editInventoryView = async function (req, res, next) {
     title: "Edit " + itemName,
     nav,
     classificationSelect: classificationSelect,
-    errors: null, // No errors on initial load
+    errors: null, 
 
-    // <--- CRITICAL: Ensure inventory_id from itemData is passed as 'inv_id' to the view locals --->
-    inv_id: itemData.inventory_id, // This populates locals.inv_id in the EJS
+    inv_id: itemData.inventory_id, 
     inv_make: itemData.inv_make,
     inv_model: itemData.inv_model,
     inv_year: itemData.inv_year,
@@ -247,7 +246,7 @@ invCont.updateInventory = async function (req, res, next) {
   console.log("Received req.body for update:", req.body);
   let nav = await utilities.getNav();
   const {
-    inv_id, // Ensure inv_id is destructured from req.body
+    inv_id, 
     inv_make,
     inv_model,
     inv_description,
@@ -258,7 +257,7 @@ invCont.updateInventory = async function (req, res, next) {
     inv_miles,
     inv_color,
     classification_id,
-  } = req.body; // All data comes from req.body
+  } = req.body; 
 
   // Call the model function to perform the update
   const updateResult = await invModel.updateInventory(
@@ -279,9 +278,8 @@ invCont.updateInventory = async function (req, res, next) {
   if (updateResult) {
     const itemName = updateResult.inv_make + " " + updateResult.inv_model;
     req.flash("notice", `The ${itemName} was successfully updated.`);
-    res.redirect("/inv/"); // Redirect to management view on success
+    res.redirect("/inv/"); 
   } else {
-    // If update failed, re-render the edit form with an error message
     const classificationSelect = await utilities.buildClassificationList(classification_id);
     const itemName = `${inv_make} ${inv_model}`;
     req.flash("notice", "Sorry, the update failed.");
@@ -289,8 +287,7 @@ invCont.updateInventory = async function (req, res, next) {
       title: "Edit " + itemName,
       nav,
       classificationSelect: classificationSelect,
-      errors: null, // Errors will be handled by invVal.checkUpdateData if it gets here after validation
-      // Pass back all the submitted data to make the form sticky
+      errors: null, 
       inv_id,
       inv_make,
       inv_model,
@@ -311,32 +308,27 @@ invCont.updateInventory = async function (req, res, next) {
  * Build delete confirmation view
  * ************************** */
 invCont.deleteView = async function (req, res, next) {
-  const inv_id = parseInt(req.params.inv_id); // Get inv_id from URL parameter
+  const inv_id = parseInt(req.params.inv_id); 
   let nav = await utilities.getNav();
-  const itemData = await invModel.getInventoryById(inv_id); // Fetch vehicle data
+  const itemData = await invModel.getInventoryById(inv_id); 
 
   if (!itemData) {
     req.flash("notice", "Sorry, that vehicle could not be found.");
-    return res.redirect("/inv/"); // Redirect if vehicle not found
+    return res.redirect("/inv/"); 
   }
 
   const itemName = `${itemData.inv_make} ${itemData.inv_model}`;
-  res.render("inventory/delete-confirm", { // Render the delete-confirm view
-    title: "Delete " + itemName, // Set title for the view
+  res.render("inventory/delete-confirm", { 
+    title: "Delete " + itemName, 
     nav,
-    errors: null, // No errors on initial load
-    // Pass only the data needed for the delete-confirm view
+    errors: null, 
     inv_id: itemData.inventory_id,
     inv_make: itemData.inv_make,
     inv_model: itemData.inv_model,
     inv_year: itemData.inv_year,
     inv_price: itemData.inv_price,
-    inv_miles: itemData.inv_miles, // Miles is also displayed
-    inv_color: itemData.inv_color, // Color is also displayed (if you decide to keep it in view)
-    // The instructions specified only make, model, year, price.
-    // Ensure you pass only what delete-confirm.ejs expects, or pass all for safety.
-    // For now, let's align strictly with prompt for make, model, year, price.
-    // If you kept more fields in your EJS, pass them here.
+    inv_miles: itemData.inv_miles, 
+    inv_color: itemData.inv_color, 
   });
 };
 
@@ -345,18 +337,17 @@ invCont.deleteView = async function (req, res, next) {
  * Process Delete Inventory
  * ************************** */
 invCont.deleteItem = async function (req, res, next) {
-  const inv_id = parseInt(req.body.inv_id); // Get inv_id from the hidden input in the form
-  const deleteResult = await invModel.deleteInventoryItem(inv_id); // Call the model function to delete
+  const inv_id = parseInt(req.body.inv_id); 
+  const deleteResult = await invModel.deleteInventoryItem(inv_id); 
 
-  if (deleteResult) { // If rowCount > 0, deletion was successful
+  if (deleteResult) { 
     req.flash("notice", `The deletion was successful.`);
-    res.redirect("/inv/"); // Redirect to inventory management on success
+    res.redirect("/inv/"); 
   } else {
-    // If deletion failed, fetch item data again for sticky form and error message
     const itemData = await invModel.getInventoryById(inv_id);
     const itemName = `${itemData.inv_make} ${itemData.inv_model}`;
     req.flash("notice", `Sorry, the delete failed for ${itemName}.`);
-    res.redirect(`/inv/delete/${inv_id}`); // Redirect back to delete confirmation view on failure
+    res.redirect(`/inv/delete/${inv_id}`); 
   }
 };
 

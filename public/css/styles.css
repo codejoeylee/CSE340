@@ -503,7 +503,9 @@ ul.messages li.notice {
   text-decoration: underline;
 }
 
-
+.loginlink a{
+  color: green;
+}
 
 
 

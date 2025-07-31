@@ -16,7 +16,10 @@ router.get("/trigger-error", invController.throwError);
 
 
 // Inventory Management View
-router.get("/", invController.buildManagement);
+router.get("/",
+  utilities.checkEmployeeAdminAuth,
+  invController.buildManagement
+);
 
 
 router.get(
@@ -30,6 +33,7 @@ router.get(
 router.get("/add-classification", invController.buildAddClassification);
 router.post(
   "/add-classification",
+  utilities.checkEmployeeAdminAuth,
   invVal.checkClassificationName,
   invVal.handleClassificationErrors,
   invController.insertClassification
@@ -40,38 +44,43 @@ router.post(
 router.get("/add-inventory", invController.buildAddInventory);
 router.post(
   "/add-inventory",
-  invVal.checkInventoryData,           // Validation Rules
-  invVal.handleInventoryErrors,        // Middleware for error handling
-  invController.insertInventory        // Proceed if no errors
+  utilities.checkEmployeeAdminAuth,
+  invVal.checkInventoryData,           
+  invVal.handleInventoryErrors,        
+  invController.insertInventory        
 )
 
 
 // Route to build the edit inventory view (ADD THIS NEW ROUTE)
 router.get(
   "/edit/:inv_id",
-  utilities.handleErrors(invController.editInventoryView) // Use the name you choose in the controller
+  utilities.checkEmployeeAdminAuth,
+  utilities.handleErrors(invController.editInventoryView) 
 )
 
 
 // Route to handle the update inventory data (ADD THIS NEW ROUTE)
 router.post(
   "/update/",
-  invVal.checkInventoryData, // Apply existing validation rules
-  invVal.checkUpdateData,    // Use the new checkUpdateData middleware
-  utilities.handleErrors(invController.updateInventory) // This function will be created next
+  utilities.checkEmployeeAdminAuth,
+  invVal.checkInventoryData, 
+  invVal.checkUpdateData,    
+  utilities.handleErrors(invController.updateInventory) 
 )
 
 
 // Route to build the delete confirmation view
 router.get(
-  "/delete/:inv_id", // Parameter to get the specific item to delete
-  utilities.handleErrors(invController.deleteView) // Controller function to deliver the view
+  "/delete/:inv_id",
+  utilities.checkEmployeeAdminAuth,
+  utilities.handleErrors(invController.deleteView) 
 );
 
 // Route to handle the actual deletion
 router.post(
   "/delete/",
-  utilities.handleErrors(invController.deleteItem) // Controller function to carry out the delete
+  utilities.checkEmployeeAdminAuth,
+  utilities.handleErrors(invController.deleteItem) 
 );
 
 

@@ -164,14 +164,12 @@ Util.checkLogin = (req, res, next) => {
 
 /* ****************************************
 * Middleware to check if user has a specific account type (e.g., "Admin", "Employee")
-* This is a placeholder for now. You'll likely expand this later.
 * ****************************************/
 Util.checkAccountType = (req, res, next) => {
   console.log('--- checkAccountType Debug ---');
   console.log('res.locals.loggedin:', res.locals.loggedin);
   console.log('res.locals.accountData:', res.locals.accountData);
 
-  // Make sure res.locals.accountData exists before trying to access its properties
   const accountType = res.locals.accountData ? res.locals.accountData.account_type : null;
   console.log('Account Type:', accountType);
 
@@ -181,8 +179,47 @@ Util.checkAccountType = (req, res, next) => {
   } else {
     console.log('User NOT logged in or insufficient permissions. Redirecting to /account/login');
     req.flash("notice", "You do not have the necessary permissions to access this page.");
-    // This redirect is what causes the HTML response for the fetch call
-    res.redirect("/account/login"); // Or whatever your default redirect for no access is
+    res.redirect("/account/login"); 
+  }
+};
+
+
+/* ****************************************
+ * Middleware to check if user is logged in AND is Employee/Admin
+ * *************************************** */
+Util.checkEmployeeAdminAuth = (req, res, next) => {
+  if (res.locals.loggedin) { 
+    try {
+      const token = req.cookies.jwt;
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+      if (decoded.account_type === "Employee" || decoded.account_type === "Admin") {
+        next(); 
+      } else {
+
+        req.flash("notice", "You are not authorized to access this area.");
+        return res.redirect("/account/login");
+      }
+    } catch (error) {
+      console.error("Authorization error:", error);
+      req.flash("notice", "Please log in with appropriate credentials.");
+      return res.redirect("/account/login");
+    }
+  } else {
+    req.flash("notice", "Please log in to access this area.");
+    return res.redirect("/account/login");
+  }
+};
+
+/* ****************************************
+ * Middleware to check if the logged-in user owns the account being updated
+ * *************************************** */
+Util.checkAccountOwnership = (req, res, next) => {
+  if (res.locals.accountData && parseInt(req.params.account_id) === res.locals.accountData.account_id) {
+    next(); 
+  } else {
+    req.flash("notice", "You are not authorized to update this account.");
+    return res.redirect("/account/"); 
   }
 };
 
@@ -196,4 +233,6 @@ module.exports = {
   handleErrors: Util.handleErrors,
   checkJWTToken: Util.checkJWTToken,
   checkAccountType: Util.checkAccountType,
+  checkEmployeeAdminAuth: Util.checkEmployeeAdminAuth,
+  checkAccountOwnership: Util.checkAccountOwnership,
 };

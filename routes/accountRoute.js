@@ -34,5 +34,41 @@ router.post(
 );
 
 
+/* **************************************
+ * New Routes for Account Management
+ * **************************************/
+
+// Route to deliver the account update view (Protected by checkLogin and checkAccountOwnership)
+router.get(
+  "/update/:account_id",
+  utilities.checkLogin, // Ensures user is logged in
+  utilities.checkAccountOwnership, // Ensures user is updating their own account (implement this in utilities/index.js if not already)
+  utilities.handleErrors(accountController.buildAccountUpdate)
+);
+
+// Route to process the account update form submission (Protected)
+router.post(
+  "/update",
+  utilities.checkLogin, // Ensures user is logged in
+  regValidate.accountUpdateRules(), // Validation rules for account details
+  regValidate.checkAccountUpdateData, // Middleware to check validation results
+  utilities.handleErrors(accountController.updateAccount)
+);
+
+// Route to process the password change form submission (Protected)
+router.post(
+  "/change-password",
+  utilities.checkLogin, 
+  regValidate.passwordChangeRules(), 
+  regValidate.checkPasswordChangeData, 
+  utilities.handleErrors(accountController.changePassword)
+);
+
+// Route for logout (Publicly accessible, but clears JWT)
+router.get(
+  "/logout",
+  utilities.handleErrors(accountController.accountLogout)
+);
+
 
 module.exports = router;

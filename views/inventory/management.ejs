@@ -4,34 +4,42 @@
   <title><%= title %> | CSE Motors</title>
 </head>
 <body>
-  <h1><%= title %></h1>
-
-  <!-- Flash Message -->
   <%- messages() %>
 
-  <% if (notice) { %>
-    <div class="notice"><%= notice %></div>
+  <% if (locals.accountData) { %>
+      <!-- Conditional Greeting -->
+      <h1>Welcome <%= locals.accountData.account_firstname %></h1>
+
+      <!-- Update Account Information Link (for all logged-in users) -->
+      <p><a href="/account/update/<%= locals.accountData.account_id %>" title="Update Account Information">Update Account Information</a></p>
+
+      <% if (locals.accountData.account_type === "Employee" || locals.accountData.account_type === "Admin") { %>
+          <!-- Inventory Management section (only for Employee/Admin) -->
+          <h3>Inventory Management</h3>
+          <p>Use the links below to manage inventory classifications and vehicles.</p>
+          <div class="card">
+            <ul>
+                <li><a href="/inv/add-classification">➕ Add New Classification</a></li>
+                <li><a href="/inv/add-inventory">🚗 Add New Vehicle</a></li>
+            </ul>
+          </div>
+
+          <!-- Existing "Manage Inventory" section for selecting classifications, only for Employee/Admin -->
+          <h2>Manage Inventory</h2>
+          <p>Choose a classification to see those inventory items.</p>
+          <%- classificationSelect %>
+
+          <table id="inventoryDisplay"></table>
+
+      <% } %>
+  <% } else { %>
+      <h1><%= title %></h1>
+      <p>Please log in to manage your account.</p>
   <% } %>
 
-
-  <div class="card">
-    <h2>Inventory Management</h2>
-    <p>Use the links below to manage inventory classifications and vehicles.</p>
-    <ul>
-        <li><a href="/inv/add-classification">➕ Add New Classification</a></li>
-        <li><a href="/inv/add-inventory">🚗 Add New Vehicle</a></li>
-    </ul>
-  </div>
-
-  <h2>Manage Inventory</h2>
-  <p>Choose a classification to see those inventory items.</p>
-  <%- classificationSelect %>
-
-  <table id="inventoryDisplay"></table>
-
   <noscript>JavaScript must be enabled to use this page.</noscript>
-
   <script src="../../js/inventory.js"></script>
 
 </body>
 </html>
+

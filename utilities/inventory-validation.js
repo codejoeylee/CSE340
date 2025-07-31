@@ -1,12 +1,12 @@
 // utilities/inventory-validation.js
 
 const invModel = require("../models/inventory-model")
-const utilities = require(".") // Make sure this path is correct relative to the file
+const utilities = require(".") 
 const { body, validationResult } = require("express-validator")
 
 const inventoryValidation = {}
 
-/* ✅ Validation Rules for Classification */
+/*  Validation Rules for Classification */
 inventoryValidation.checkClassificationName = [
   body("classification_name")
     .trim()
@@ -24,7 +24,7 @@ inventoryValidation.checkClassificationName = [
     })
 ]
 
-/* ✅ Validation Rules for Inventory (Used for both Add and Update) */
+/*  Validation Rules for Inventory (Used for both Add and Update) */
 inventoryValidation.checkInventoryData = [
   body("classification_id").isInt().withMessage("Select a valid classification."),
   body("inv_make").trim().isLength({ min: 3 }).withMessage("Make must be at least 3 characters."),
@@ -38,7 +38,7 @@ inventoryValidation.checkInventoryData = [
   body("inv_color").trim().notEmpty().withMessage("Color is required.")
 ]
 
-/* ⚠️ Error Handling for Classification Form */
+/*  Error Handling for Classification Form */
 inventoryValidation.handleClassificationErrors = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -54,7 +54,7 @@ inventoryValidation.handleClassificationErrors = async (req, res, next) => {
   next()
 }
 
-/* ⚠️ Error Handling for Inventory Form (ADD PROCESS) */
+/*  Error Handling for Inventory Form (ADD PROCESS) */
 inventoryValidation.handleInventoryErrors = async (req, res, next) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -73,23 +73,21 @@ inventoryValidation.handleInventoryErrors = async (req, res, next) => {
   next()
 }
 
-/* ⚠️ Error Handling for Inventory Update Form (UPDATE PROCESS - RENAMED TO checkUpdateData) */
-inventoryValidation.checkUpdateData = async (req, res, next) => { // RENAMED FROM handleUpdateErrors
+/* Error Handling for Inventory Update Form (UPDATE PROCESS - RENAMED TO checkUpdateData) */
+inventoryValidation.checkUpdateData = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const nav = await utilities.getNav();
     const classificationSelect = await utilities.buildClassificationList(req.body.classification_id);
 
-    // Reconstruct itemName for the title from the submitted data
     const itemName = `${req.body.inv_make} ${req.body.inv_model}`;
 
-    res.render("inventory/edit-inventory", { // Render the edit view on error
-      title: "Edit " + itemName, // Title for the edit view
+    res.render("inventory/edit-inventory", { 
+      title: "Edit " + itemName,
       nav,
       classificationSelect,
-      errors: errors.array(), // Pass errors
-      // Pass back all submitted body data to make the form sticky, including inv_id
-      ...req.body, // This will include inv_id, inv_make, inv_model, etc.
+      errors: errors.array(),
+      ...req.body,
     });
     return;
   }
