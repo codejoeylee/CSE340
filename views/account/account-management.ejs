@@ -25,4 +25,9 @@
 <% if (locals.accountData.account_type === "Employee" || locals.accountData.account_type === "Admin") { %>
     <h3>Inventory Management</h3>
     <p><a href="/inv/" title="Click to manage inventory">Manage Inventory</a></p>
+    
+    <% if (locals.accountData.account_type === "Admin") { %>
+        <h3>User Management</h3>
+        <p><a href="/account/manage-users" title="Manage User Accounts">Manage User Accounts</a></p>
+    <% } %>
 <% } %>

@@ -71,4 +71,12 @@ router.get(
 );
 
 
+// Route to display all user accounts (NEW ROUTE)
+router.get(
+  "/manage-users",
+  utilities.checkAdminAuth, // Only Employee or Admin can access
+  utilities.handleErrors(accountController.buildAccountList)
+);
+
+
 module.exports = router;

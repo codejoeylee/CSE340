@@ -586,3 +586,91 @@ ul.messages li.error {
 .error-link a {
   color: yellow;
 }
+
+
+/* Account List Table Styling */
+
+.account-list-container {
+  margin: 20px auto;
+  padding: 15px;
+  max-width: 900px;
+  /* Adjust as needed */
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.account-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* Removes space between table cells */
+  margin-top: 20px;
+}
+
+.account-table th,
+.account-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.account-table th {
+  background-color: #004d40;
+  /* Dark teal for header */
+  color: #ffffff;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.account-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+  /* Light grey for even rows */
+}
+
+.account-table tbody tr:hover {
+  background-color: #f1f1f1;
+  /* Slightly darker on hover */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .account-table thead {
+    display: none;
+    /* Hide header on small screens */
+  }
+
+  .account-table,
+  .account-table tbody,
+  .account-table tr,
+  .account-table td {
+    display: block;
+    /* Make table elements behave like blocks */
+    width: 100%;
+  }
+
+  .account-table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .account-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+
+  .account-table td::before {
+    content: attr(data-label);
+    /* Use data-label for column names */
+    position: absolute;
+    left: 15px;
+    width: calc(50% - 30px);
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+}

@@ -224,6 +224,34 @@ Util.checkAccountOwnership = (req, res, next) => {
 };
 
 
+/* ****************************************
+ * Middleware to check if user is logged in AND is Admin ONLY (NEW)
+ * *************************************** */
+Util.checkAdminAuth = (req, res, next) => {
+  if (res.locals.loggedin) {
+    try {
+      const token = req.cookies.jwt;
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+      if (decoded.account_type === "Admin") { // Only check for "Admin"
+        next();
+      } else {
+        req.flash("notice", "You are not authorized to access this area. Admin access required.");
+        return res.redirect("/account/login");
+      }
+    } catch (error) {
+      console.error("Admin Authorization error:", error);
+      req.flash("notice", "Please log in with appropriate credentials.");
+      return res.redirect("/account/login");
+    }
+  } else {
+    req.flash("notice", "Please log in to access this area.");
+    return res.redirect("/account/login");
+  }
+};
+
+
+
 module.exports = {
   getNav: Util.getNav,
   buildClassificationGrid: Util.buildClassificationGrid,
@@ -235,4 +263,5 @@ module.exports = {
   checkAccountType: Util.checkAccountType,
   checkEmployeeAdminAuth: Util.checkEmployeeAdminAuth,
   checkAccountOwnership: Util.checkAccountOwnership,
+  checkAdminAuth: Util.checkAdminAuth,
 };

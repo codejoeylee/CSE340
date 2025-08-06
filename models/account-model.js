@@ -101,6 +101,20 @@ async function updatePassword(account_password, account_id) {
 }
 
 
+/* *****************************
+ * Get all accounts (NEW FUNCTION)
+ * *************************** */
+async function getAllAccounts() {
+  try {
+    const sql = "SELECT account_id, account_firstname, account_lastname, account_email, account_type FROM account ORDER BY account_type, account_lastname";
+    const result = await pool.query(sql);
+    return result.rows;
+  } catch (error) {
+    console.error("getAllAccounts model error: " + error);
+    throw error;
+  }
+}
+
 
 
 module.exports = {
@@ -110,4 +124,5 @@ module.exports = {
   getAccountById,
   updateAccount,
   updatePassword,
+  getAllAccounts,
 };

@@ -326,6 +326,26 @@ async function accountLogout(req, res, next) {
 }
 
 
+/* ****************************************
+* Deliver Account List view (NEW FUNCTION)
+* *************************************** */
+async function buildAccountList(req, res, next) {
+  let nav = await utilities.getNav();
+  try {
+    const accountList = await accountModel.getAllAccounts();
+    res.render("account/account-list", {
+      title: "All User Accounts",
+      nav,
+      errors: null,
+      accountList, // Pass the list of accounts to the view
+    });
+  } catch (error) {
+    console.error("buildAccountList controller error:", error);
+    req.flash("notice", "Failed to load user accounts.");
+    res.redirect("/account/"); // Redirect to account management on error
+  }
+}
+
 
 
 
@@ -339,5 +359,6 @@ module.exports = {
   buildAccountUpdate,
   updateAccount,
   accountLogout,
+  buildAccountList,
 };
 
