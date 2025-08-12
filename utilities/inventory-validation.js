@@ -40,6 +40,7 @@ inventoryValidation.checkInventoryData = [
 
 /*  Error Handling for Classification Form */
 inventoryValidation.handleClassificationErrors = async (req, res, next) => {
+  console.log("Validation errors:", validationResult(req).array());
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     const nav = await utilities.getNav()

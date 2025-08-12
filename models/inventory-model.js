@@ -150,6 +150,22 @@ async function deleteInventoryItem(inv_id) {
 }
 
 
+/* ***************************
+ * Check if classification name already exists
+ * ************************** */
+async function checkExistingClassification(classification_name) {
+  try {
+    const sql = "SELECT * FROM classification WHERE classification_name = $1";
+    const result = await pool.query(sql, [classification_name]);
+    return result.rowCount > 0; 
+  } catch (error) {
+    console.error("checkExistingClassification error:", error);
+    throw error;
+  }
+}
+
+
+
 module.exports = {
   insertInventoryItem,
   addClassification,
@@ -159,4 +175,5 @@ module.exports = {
   getInventoryById,
   updateInventory,
   deleteInventoryItem,
+  checkExistingClassification,
 };

@@ -10,7 +10,7 @@
   <%- messages() %>
 
   <!-- Add Classification Form -->
-  <form action="/inv/add-classification" method="post" required>
+  <form action="/inv/add-classification" method="post" onsubmit="console.log('Form submitted')" required>
     <label for="classificationName">Classification Name:</label>
     <input 
       type="text" 
@@ -24,12 +24,13 @@
   </form>
 
   <!-- Server-side Errors -->
-  <% if (errors) { %>
-    <ul>
-      <% errors.forEach(error => { %>
-        <li><%= error.msg %></li>
-      <% }) %>
-    </ul>
-  <% } %>
+  <% if (Array.isArray(errors) && errors.length > 0) { %>
+  <ul>
+    <% errors.forEach(error => { %>
+      <li><%= error.msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
 </body>
 </html>
